@@ -1,0 +1,78 @@
+---
+title: "BMIN503/EPID600 Project Template"
+author: "Mark Potter"
+output: 
+  html_document:
+    toc: false 
+    depth: 3 
+    theme: paper 
+    highlight: tango
+---
+```{r set-options, echo=FALSE, cache=FALSE}
+options(width = 400)
+```  
+***
+Use this template to complete your project throughout the course. Your Final Project presentation will be based on the contents of this document. Replace the title/name above and text below with your own, but keep the headers.
+
+### Overview
+>This project will examine the possible relationship between olfactory funciton, hand-grip strength, and cognition. The data will be derived from the National Health and Nutrition Examination Survey (NHANES) administered in 2013-2014.
+
+```{r}
+
+```
+
+### Introduction 
+
+>Smell dysfunction is an early biomarker of neurodegenerative diseases such as Parkinson's and Alheimer's. It is also very closely associated with measures of cognition such as the Montreal Cognitive Assessment Test and the Mini-Mental Status Examination. There is also a growing area of literature examing grip-strength and it's close relationship between cognitive function. This project will be the first to examine if a relationship exists between olfaction, grip-strength, and cognitive scores. In 2013-2014 the NHANES added a smell assessment test to their extensive battery of tests.This test was a 8-item scratch and sniff test developed by Sensonics International (Haddonfield, NJ). There are numerious publications examining the olfactory ability and various tests and assesments administered during the NHANEs such as cognition, cardiometabolic function, and diabetes. Decreased cognitive dysfunction is associated with a decrease in grip-strength. It is theorized that neuro-decline in regions of cognition are close in proximity to motor areas and could explain the decline. There are many causes of decline in grip-strength such such as frailty and its related mechanims but could also be related to acetylcholine (ACh) release in the motor endplate and neuromuscular junction. It has be observed in motor-endplate disorders such as Mysathenia Gravis that there demonstrable smell loss. Dr. Richard Doty, theorizes that smell function could be greatly influenced by ACh. While grip-strength may not directly reflect ACh function it's relationship to cognition creates an expection that it could as be related to smell function.
+
+> Exploring olfaction, grip-strength, and cognition crosses many disciplines. While olfaction is largely studied in clinical settings within Otorhinolaryngology departments, neurodegenerative diseases are explored by neurologists and movement disorder specialists. Since smell loss can occur before any motor symptoms arise in diseases like Parkinson's it is an important biomarker to understand. It is unknown while the olfactory system is such an early biomarker but the ACh theory could be a fundamental step. While grip strength is not a direct measure of ACh function it could be a small step towards recognizing a potential relationship to be further explored by direct measures of ACh function.
+
+
+
+### Methods
+Describe the data used and general methodological approach. Subsequently, incorporate full R code necessary to retrieve and clean data, and perform analysis. Be sure to include a description of code so that others (including your future self) can understand what you are doing and why. 
+```{r}
+library(foreign)
+library(dplyr)
+library(tidyr)
+
+#Download Demographics
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2013-2014/DEMO_H.XPT", tf <- tempfile(), mode="wb")
+DEMO <- foreign::read.xport(tf)
+#Download Cognitive Functioning
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2013-2014/CFQ_H.XPT", tf <- tempfile(), mode="wb")
+COG <- foreign::read.xport(tf)
+#Download Smell and Taste Exam
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2013-2014/CSX_H.XPT", tf <- tempfile(), mode="wb")
+ST <- foreign::read.xport(tf)
+#Download Grip Strength
+download.file("https://wwwn.cdc.gov/nchs/nhanes/2013-2014/MGX_H.XPT", tf <- tempfile(), mode="wb")
+GS <- foreign::read.xport(tf)
+
+STDEMO <- inner_join(ST, DEMO, by = "SEQN")
+COGGS <- inner_join(GS, COG, by = "SEQN")
+COMBINED <- inner_join(STDEMO, COGGS, by = "SEQN")
+
+COMBINED <- COMBINED %>%
+            rename(Chocolate = CSXCHOOD, Strawberry = CSXSBOD, Smoke = CSXSMKOD, Leather = CSXLEAOD, 
+                   Soap = CSXSOAOD, Grape = CSXGRAOD, Onion = CSXONOD, NaturalGas = CSXNGSOD, GripStrength = MGDCGSZ,
+                   DigitSymbol = CFDDS, gender = RIAGENDR, age = RIDAGEYR, 
+                   race = RIDRETH1) %>%
+            mutate(gender = factor(gender, levels = c(1, 2), labels = c("male", "female"))) %>%
+            mutate(race = factor(race, levels = c(3, 1, 2, 4, 5), 
+                                 labels = c("White", "MexicanAmerican", "Hispanic", "Black", "other"))) %>%
+            filter(!is.na(Chocolate)) %>%
+            filter(!is.na(Strawberry)) %>%
+            filter(!is.na(Smoke)) %>%
+            filter(!is.na(Leather)) %>%
+            filter(!is.na(Soap)) %>%
+            filter(!is.na(Grape)) %>%
+            filter(!is.na(Onion)) %>%
+            filter(!is.na(NaturalGas)) %>%
+            filter(!is.na(GripStrength)) %>%
+            filter(!is.na(DigitSymbol))
+#Need to convert the correct smell responses to 1 for correct 0 for incorrect and create a summed total score column.
+#
+```
+### Results
+Describe your results and include relevant tables, plots, and code/comments used to obtain them. End with a brief conclusion of your findings related to the question you set out to address. You can include references if you'd like, but this is not required.
