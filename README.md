@@ -17,5 +17,5 @@ DUE DATE FOR FINAL VERSION: 12/11/20 11:59PM. This is a hard deadline. Turn in w
 [forking]: https://guides.github.com/activities/forking/
 
 
-
+This project will examine the possible associations between olfactory funciton, hand-grip strength, and cognition. The data will be derived from the National Health and Nutrition Examination Survey (NHANES) administered in 2013-2014.
 

@@ -35,6 +35,7 @@ Describe the data used and general methodological approach. Subsequently, incorp
 library(foreign)
 library(dplyr)
 library(tidyr)
+library(plyr)
 
 #Download Demographics
 download.file("https://wwwn.cdc.gov/nchs/nhanes/2013-2014/DEMO_H.XPT", tf <- tempfile(), mode="wb")
@@ -61,7 +62,7 @@ COMBINED <- COMBINED %>%
             mutate(gender = factor(gender, levels = c(1, 2), labels = c("male", "female"))) %>%
             mutate(race = factor(race, levels = c(3, 1, 2, 4, 5), 
                                  labels = c("White", "MexicanAmerican", "Hispanic", "Black", "other"))) %>%
-            filter(!is.na(Chocolate)) %>%
+            filter(!is.na(Chocolate)) %>% #Need to remove NA responses as the test is designed with forced choice questioning no.
             filter(!is.na(Strawberry)) %>%
             filter(!is.na(Smoke)) %>%
             filter(!is.na(Leather)) %>%
@@ -71,8 +72,32 @@ COMBINED <- COMBINED %>%
             filter(!is.na(NaturalGas)) %>%
             filter(!is.na(GripStrength)) %>%
             filter(!is.na(DigitSymbol))
-#Need to convert the correct smell responses to 1 for correct 0 for incorrect and create a summed total score column.
-#
+#Filter Correct Responses
+COMBINED$ChocolateCorrect <- COMBINED$Chocolate == 2  # Response 2 Was "correct" for Chocolate
+          COMBINED$ChocolateCorrect<- as.numeric(as.logical(COMBINED$ChocolateCorrect))
+COMBINED$StrawberryCorrect <- COMBINED$Strawberry == 1  # Response 1 Was "correct" for Strawberry
+          COMBINED$StrawberryCorrect<- as.numeric(as.logical(COMBINED$StrawberryCorrect))
+COMBINED$SmokeCorrect <- COMBINED$Smoke == 3  # Response 3 Was "correct" for Smoke
+          COMBINED$SmokeCorrect<- as.numeric(as.logical(COMBINED$SmokeCorrect))    
+COMBINED$LeatherCorrect <- COMBINED$Leather == 3  # Response 3 Was "correct" for Leather
+          COMBINED$LeatherCorrect<- as.numeric(as.logical(COMBINED$LeatherCorrect))           
+COMBINED$SoapCorrect <- COMBINED$Soap == 1  # Response 1 Was "correct" for NaturalGas
+          COMBINED$SoapCorrect<- as.numeric(as.logical(COMBINED$SoapCorrect))
+COMBINED$GrapeCorrect <- COMBINED$Grape == 2  # Response 2 Was "correct" for Grape
+          COMBINED$GrapeCorrect<- as.numeric(as.logical(COMBINED$GrapeCorrect))
+COMBINED$OnionCorrect <- COMBINED$Onion == 3  # Response 3 Was "correct" for Onion
+          COMBINED$OnionCorrect<- as.numeric(as.logical(COMBINED$OnionCorrect))
+COMBINED$NaturalGasCorrect <- COMBINED$NaturalGas == 4  # Response 4 Was "correct" for NaturalGas
+          COMBINED$NaturalGasCorrect<- as.numeric(as.logical(COMBINED$NaturalGasCorrect))
+#Calculate Total Smell Identification Score
+COMBINED$TotalSIT <- rowSums(COMBINED[,c(133:140)])
+
+#calculate Normal Olfaction vs. Demonstrable Dysfuction 
+COMBINED$OlfactoryAbility <- COMBINED$TotalSIT >= 6  # 6 or Above considered normal
+     COMBINED$OlfactoryAbility<- as.factor(as.logical(COMBINED$OlfactoryAbility))
+levels(COMBINED$OlfactoryAbility) <- c('Dysfunction', 'Normosmic')
+table(COMBINED$OlfactoryAbility)
+
 ```
 ### Results
 Describe your results and include relevant tables, plots, and code/comments used to obtain them. End with a brief conclusion of your findings related to the question you set out to address. You can include references if you'd like, but this is not required.
