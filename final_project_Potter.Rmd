@@ -17,9 +17,6 @@ Use this template to complete your project throughout the course. Your Final Pro
 ### Overview
 >This project will examine the possible relationship between olfactory funciton, hand-grip strength, and cognition. The data will be derived from the National Health and Nutrition Examination Survey (NHANES) administered in 2013-2014.
 
-```{r}
-
-```
 
 ### Introduction 
 
@@ -35,7 +32,8 @@ Describe the data used and general methodological approach. Subsequently, incorp
 library(foreign)
 library(dplyr)
 library(tidyr)
-library(plyr)
+library(ggplot2)
+
 
 #Download Demographics
 download.file("https://wwwn.cdc.gov/nchs/nhanes/2013-2014/DEMO_H.XPT", tf <- tempfile(), mode="wb")
@@ -92,11 +90,20 @@ COMBINED$NaturalGasCorrect <- COMBINED$NaturalGas == 4  # Response 4 Was "correc
 #Calculate Total Smell Identification Score
 COMBINED$TotalSIT <- rowSums(COMBINED[,c(133:140)])
 
-#calculate Normal Olfaction vs. Demonstrable Dysfuction 
-COMBINED$OlfactoryAbility <- COMBINED$TotalSIT >= 6  # 6 or Above considered normal
+#calculate Normal Olfaction vs. Demonstrable Dysfunction 
+COMBINED$OlfactoryAbility <- COMBINED$TotalSIT >= 6  # 6 or Above considered normal based on literature 
      COMBINED$OlfactoryAbility<- as.factor(as.logical(COMBINED$OlfactoryAbility))
 levels(COMBINED$OlfactoryAbility) <- c('Dysfunction', 'Normosmic')
+
 table(COMBINED$OlfactoryAbility)
+
+#need to transform Cog and GS scores and look into literature 
+
+fig<- ggplot(data = COMBINED, aes(TotalSIT)) +  #Need to figure out from faculty advior which plots would be best
+       geom_histogram(aes(y = ..density..), breaks = seq(0, 8, 1), 
+                   color = "blue", fill = "blue", alpha = 0.7) 
+
+
 
 ```
 ### Results

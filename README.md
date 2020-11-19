@@ -17,5 +17,5 @@ DUE DATE FOR FINAL VERSION: 12/11/20 11:59PM. This is a hard deadline. Turn in w
 [forking]: https://guides.github.com/activities/forking/
 
 
-This project will examine the possible associations between olfactory funciton, hand-grip strength, and cognition. The data will be derived from the National Health and Nutrition Examination Survey (NHANES) administered in 2013-2014.
+This project will examine the possible associations between olfactory function, hand-grip strength, and cognition. The data will be derived from the National Health and Nutrition Examination Survey (NHANES) administered in 2013-2014. The NHANES during that time period utilized objective measure of smell ability, an eight item odor identification test adapted from the University of Pennsylvania Smell Identification test (UPSIT). It is well documented that there is strong relationship between olfaction and cognitive functioning. There is also strong evidence that grip-strength and cognition have a close relationship. Examining the relationship between grip-strength and olfaction is novel. 
 
