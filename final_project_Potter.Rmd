@@ -99,7 +99,7 @@ table(COMBINED$OlfactoryAbility)
 
 #need to transform Cog and GS scores and look into literature 
 
-fig<- ggplot(data = COMBINED, aes(TotalSIT)) +  #Need to figure out from faculty advior which plots would be best
+ggplot(data = COMBINED, aes(TotalSIT)) +  #Need to figure out from faculty advior which plots would be best
        geom_histogram(aes(y = ..density..), breaks = seq(0, 8, 1), 
                    color = "blue", fill = "blue", alpha = 0.7) 
 
