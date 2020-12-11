@@ -11,28 +11,32 @@ output:
 ```{r set-options, echo=FALSE, cache=FALSE}
 options(width = 400)
 ```  
-***
-Use this template to complete your project throughout the course. Your Final Project presentation will be based on the contents of this document. Replace the title/name above and text below with your own, but keep the headers.
+
 
 ### Overview
->This project will examine the possible relationship between olfactory funciton, hand-grip strength, and cognition. The data will be derived from the National Health and Nutrition Examination Survey (NHANES) administered in 2013-2014.
+
+>This project will examine the possible relationship between olfactory funciton, hand-grip strength, and cognition. The data will be derived from the National Health and Nutrition Examination Survey (NHANES) administered in 2013-2014. Thank you for your help Dr. Richard Doty, Dr. Fran Shofer, and Tom McKeon, MPH.
 
 
 ### Introduction 
 
->Smell dysfunction is an early biomarker of neurodegenerative diseases such as Parkinson's and Alheimer's. It is also very closely associated with measures of cognition such as the Montreal Cognitive Assessment Test and the Mini-Mental Status Examination. There is also a growing area of literature examing grip-strength and it's close relationship between cognitive function. This project will be the first to examine if a relationship exists between olfaction, grip-strength, and cognitive scores. In 2013-2014 the NHANES added a smell assessment test to their extensive battery of tests.This test was a 8-item scratch and sniff test developed by Sensonics International (Haddonfield, NJ). There are numerious publications examining the olfactory ability and various tests and assesments administered during the NHANEs such as cognition, cardiometabolic function, and diabetes. Decreased cognitive dysfunction is associated with a decrease in grip-strength. It is theorized that neuro-decline in regions of cognition are close in proximity to motor areas and could explain the decline. There are many causes of decline in grip-strength such such as frailty and its related mechanims but could also be related to acetylcholine (ACh) release in the motor endplate and neuromuscular junction. It has be observed in motor-endplate disorders such as Mysathenia Gravis that there demonstrable smell loss. Dr. Richard Doty, theorizes that smell function could be greatly influenced by ACh. While grip-strength may not directly reflect ACh function it's relationship to cognition creates an expection that it could as be related to smell function.
+>Smell dysfunction is an early biomarker of neurodegenerative diseases such as Parkinson's and Alheimer's. It is also very closely associated with measures of cognition such as the Montreal Cognitive Assessment Test and the Mini-Mental Status Examination. There is also a growing area of literature examing grip-strength and it's close relationship between cognitive function. This project will be exploratory and examine if a relationship exists between olfaction, grip-strength, and cognitive scores. In 2013-2014 the NHANES added a smell assessment test to their extensive battery of tests.This test was a 8-item scratch and sniff test developed by Sensonics International (Haddonfield, NJ). There are numerious publications examining the olfactory ability and various tests and assesments administered during the NHANEs such as cognition, cardiometabolic function, and diabetes. Decreased cognitive dysfunction is associated with a decrease in grip-strength. It is theorized that neuro-decline in regions of cognition are close in proximity to motor areas and could explain the decline. There are many causes of decline in grip-strength such such as frailty and its related mechanims. If a relationship between grip-strength, cognition, and olfaction exists, a combination of the tests could serve as a cheap method of measuring brain-health.
 
-> Exploring olfaction, grip-strength, and cognition crosses many disciplines. While olfaction is largely studied in clinical settings within Otorhinolaryngology departments, neurodegenerative diseases are explored by neurologists and movement disorder specialists. Since smell loss can occur before any motor symptoms arise in diseases like Parkinson's it is an important biomarker to understand. It is unknown while the olfactory system is such an early biomarker but the ACh theory could be a fundamental step. While grip strength is not a direct measure of ACh function it could be a small step towards recognizing a potential relationship to be further explored by direct measures of ACh function.
+> Exploring olfaction, grip-strength, and cognition crosses many disciplines. While olfaction is largely studied in clinical settings within Otorhinolaryngology departments, neurodegenerative diseases are explored by neurologists and movement disorder specialists. Since smell loss can occur before any motor symptoms arise in diseases like Parkinson's it is an important biomarker to understand. It is unknown why the olfactory system is such an early biomarker but it is theorized that Acetylcholine (ACh) may play a major role. In diseases such as Myasthenia Gravis, which is a motor-endplate disorder affecting the neuromuscular junction (NMJ) and ACh, suprisingly has demonstrable smell dysfunction. This suggests that there may be central cholinergic dysfunction. The relationship between cognition and ACh is widely explored and decreases in cognition are associated with ACh decline. In a similar sense, grip-strength requires release of ACh in the NMJ to fire the muscle contraction. The exploratory examination of these relationships may lead to more specific work measuring ACh and olfaction.
 
 
 
 ### Methods
-Describe the data used and general methodological approach. Subsequently, incorporate full R code necessary to retrieve and clean data, and perform analysis. Be sure to include a description of code so that others (including your future self) can understand what you are doing and why. 
+
+> The data used will be from separate NHANES 2013-2014 examinations and surveys. The datasets will be joined by the patient identifier (SEQN).
+
 ```{r}
 library(foreign)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+library(modelsummary)
+library(survey)
 
 
 #Download Demographics
@@ -52,6 +56,13 @@ STDEMO <- inner_join(ST, DEMO, by = "SEQN")
 COGGS <- inner_join(GS, COG, by = "SEQN")
 COMBINED <- inner_join(STDEMO, COGGS, by = "SEQN")
 
+
+```
+>After combining the dataset, we will rename the variables to names that are more manageable. Specifically, we will convert the odorant names, cognitive test, grip-strength, gender, age, and race. For this study the cognitive test we will use is the Digit Symbol Subsitution Test. For grip-strength, this study will look examine the combined hand grip-strength as measured by a dynamometer in lbs. Additionally, for the odors, we will score whether the subject had the correct answer. Any subject who did not have a response for the Digit Symbol Subtitution Test and Grip-strength test will also be removed. From there, we will sum the number of correct answers giving a total score out of eight. When cleaning the data, any incomplete answer for the odor test, will lead to the entire subjects data to be removed. This is because the test design uses forced-choice questioning. In this style of testing, the subject must choose a response no matter if they can or cannot smell the odor. By not answering, we cannot simply mark the question as incorrect as it will change their total score. Once the total score is calculated, subjects will be categorized into those with demonstrable dysfunction if they score a 5/8 or lower or "Normosmic" if they score >6. The categorization will be used for data visualization. 
+
+
+```{r}
+
 COMBINED <- COMBINED %>%
             rename(Chocolate = CSXCHOOD, Strawberry = CSXSBOD, Smoke = CSXSMKOD, Leather = CSXLEAOD, 
                    Soap = CSXSOAOD, Grape = CSXGRAOD, Onion = CSXONOD, NaturalGas = CSXNGSOD, GripStrength = MGDCGSZ,
@@ -70,6 +81,8 @@ COMBINED <- COMBINED %>%
             filter(!is.na(NaturalGas)) %>%
             filter(!is.na(GripStrength)) %>%
             filter(!is.na(DigitSymbol))
+
+
 #Filter Correct Responses
 COMBINED$ChocolateCorrect <- COMBINED$Chocolate == 2  # Response 2 Was "correct" for Chocolate
           COMBINED$ChocolateCorrect<- as.numeric(as.logical(COMBINED$ChocolateCorrect))
@@ -95,16 +108,87 @@ COMBINED$OlfactoryAbility <- COMBINED$TotalSIT >= 6  # 6 or Above considered nor
      COMBINED$OlfactoryAbility<- as.factor(as.logical(COMBINED$OlfactoryAbility))
 levels(COMBINED$OlfactoryAbility) <- c('Dysfunction', 'Normosmic')
 
-table(COMBINED$OlfactoryAbility)
-
-#need to transform Cog and GS scores and look into literature 
-
-ggplot(data = COMBINED, aes(TotalSIT)) +  #Need to figure out from faculty advior which plots would be best
-       geom_histogram(aes(y = ..density..), breaks = seq(0, 8, 1), 
-                   color = "blue", fill = "blue", alpha = 0.7) 
-
-
-
 ```
 ### Results
-Describe your results and include relevant tables, plots, and code/comments used to obtain them. End with a brief conclusion of your findings related to the question you set out to address. You can include references if you'd like, but this is not required.
+
+>After cleaning the data, there were a total of 1395 subjects who completed all of the testing. A total of 679 were Male and 716 Female. With regards to race, 52% reported their race as "White", 10% "Mexican American", 8% "Hispanic", 21% "Black", and 9% "Other". A total of 1075 were normosmic and 320 had olfactory dysfunction. Age was not normally distributed as subjects aged 80 years and older were all noted as 80 in the results, therefore the median age was 69 years old. The most common smell identification score was a 7/8. The mean combined grip-strength was 61 lbs and the mean Digit Symbol Score was 47. 
+
+```{r}
+#Demographics 
+table(COMBINED$gender)
+table(COMBINED$race)
+table(COMBINED$OlfactoryAbility)
+median(COMBINED$age)
+table(COMBINED$TotalSIT)
+mean(COMBINED$age)
+mean(COMBINED$GripStrength)
+mean(COMBINED$DigitSymbol)
+table(COMBINED$age < 80)
+```
+###
+>The bar plot below shows the distribution of the total smell identifciation scores. The majority of subjects scored either a 7 or 8 on the test.
+
+```{r}
+#Total SIT Scores
+ggplot(data = COMBINED, aes(x = TotalSIT)) +
+    ggtitle("Total Smell Identification Scores and Counts")+
+    geom_bar()
+```
+###
+>The bar plot below examines olfactory ability by race. The teal color represents normosmic subjects and the salmon color represents those with olfactory dysfunction.
+
+```{r}
+#Race and Olfactory Ability
+ggplot(data = COMBINED, aes(x = race, fill = OlfactoryAbility)) +
+    ggtitle("Olfactory Ability by Race")+
+    geom_bar(position = "dodge")
+```
+###
+>The bar graph below examines the olfactory ability by gender. Again, the teal color represents normosmic subjects and the salmon color represents those with olfactory dysfunction. Here we observe, a well established phenomena that female subjects have a better sense of smell than male subjects.
+
+```{r}
+#Gender and Olfactory Ability
+ggplot(data = COMBINED, aes(x = gender, fill = OlfactoryAbility)) +
+    ggtitle("Olfactory Ability by Gender")+
+    geom_bar(position = "dodge")
+```
+###
+> The boxplot below shows distribution of ages in the normosmic and dysfunction groups. Please note that this includes the extra cases of 200 individuals who were marked as age 80.
+
+```{r}
+#Plot Age by Olfactory Ability
+ggplot(data = COMBINED, aes(x = OlfactoryAbility, y = age)) +
+    ggtitle("Olfactory Ability and Age Distribution")+
+    geom_boxplot()
+```
+###
+>Below are exploratory scatterplots to see if there are any trends in possible relationships between total smell score and the DSST and grip-strength test. There appears to be a strong positive linear relationship between total smell score and the DSST cognitive test. This is expected based on the literature. However, there is a small possible positive association between total smell score and grip-strength.
+
+```{r}
+#Exploratory
+ggplot(data = COMBINED, aes(x = TotalSIT, y = DigitSymbol)) +
+    geom_point(color = "blue") + 
+    geom_smooth(method = "lm", color = "red")+
+    ggtitle("Total Smell Identification Score and Digit Symbol Scores")
+
+ggplot(data = COMBINED, aes(x = TotalSIT, y = GripStrength)) +
+    geom_point(color = "blue") + 
+    geom_smooth(method = "lm", color = "red")+
+    ggtitle("Total Smell Identification Score and Grip Strength Scores")
+```
+###
+>Below is the linear regression for the total smell score, digit symbol, grip-strength, gender, age, and race. The results reveal significant associations between all variables exccept for race being Mexican American or Hispanic. The positive association between olfaction and the cognitive (DSST) test is as expected. The negative association between age and olfaction is also expected. After the age of 65 everyone experiences some decline in olfactory dysfunction. Additionally, there was an association between grip-strength and total smell score. While the effects are small based on the odds ratio, there is some sort of association evident.
+
+```{r}
+#Regression
+TotalSIT<- summary.lm(lm(TotalSIT ~ DigitSymbol + GripStrength + gender + age +race, data = COMBINED))
+print(TotalSIT)
+exp(coef(TotalSIT)) #Odds ratios.
+
+```
+### Discussion/Conclusion
+
+>There is an observed association between grip-strength, cognition, and olfactory ability. Given the broad associations observed, the smell test, grip-strength, and DSST likely reflect overall health. There are many limitions with this study as it simply an exploratory report. For instance, the broad associations seen may simply reflect the overal health of the population and the tests examined reflect that. More variables should be added to the model as well to futher explore and understand what might be going on. Next steps would be to include the additional cognitive tests collected in the study. It would also be interesting to observe any differences between handedness by examining dominant vs. non-dominant hands. Additionally, machine learning could be utilized to examine if the failure to smell certain odors could serve as a predictor of cognitive decline. 
+
+
+
